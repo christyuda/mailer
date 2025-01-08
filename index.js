@@ -1,18 +1,21 @@
-require('dotenv').config();
 const express = require('express');
-const mailerRoutes = require('./src/routes/mailerRoutes');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 9000;
 
-app.use(express.json());
+// Middleware Rate Limiting (Global)
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 menit
+    max: 100, // Maksimal 100 request per IP dalam 15 menit
+    message: 'Terlalu banyak permintaan. Coba lagi nanti.',
+});
+app.use(globalLimiter); // Pasang rate limiter global
+
+// Routes
+const mailerRoutes = require('./src/routes/mailerRoutes');
 app.use('/api/mailer', mailerRoutes);
 
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-});
-
 app.listen(PORT, () => {
-    console.log(`Mailer service running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
