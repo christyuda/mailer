@@ -12,10 +12,24 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter); // Pasang rate limiter global
 
-// Routes
+// Middleware untuk parsing JSON
+app.use(express.json());
+
+// Route untuk root URL
+app.get('/', (req, res) => {
+    res.send('<h1>Welcome to Mailer Service</h1><p>Use the endpoint <code>/api/mailer/send</code> to send emails.</p>');
+});
+
+// Routes untuk API Mailer
 const mailerRoutes = require('./src/routes/mailerRoutes');
 app.use('/api/mailer', mailerRoutes);
 
+// Middleware untuk menangani 404
+app.use((req, res) => {
+    res.status(404).json({ message: 'Endpoint not found' });
+});
+
+// Menjalankan server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
